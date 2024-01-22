@@ -12,6 +12,7 @@ cydantic = "cydantic.main:main"
 [tool.poetry.dependencies]
 python = "^3.12"
 pydantic = "^2.5.3"
+pyyaml = "^6.0.1"
 
 [build-system]
 requires = ["poetry-core"]
