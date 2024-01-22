@@ -6,7 +6,11 @@ conao3's pydantic CLI wrapper.
 
 ### Install from PyPI
 
-release soon.
+Recommend to use [pipx](https://pipx.pypa.io/stable/) to install.
+
+```bash
+pipx install cydantic
+```
 
 ### Install from Source
 
