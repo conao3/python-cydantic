@@ -2,7 +2,9 @@ import argparse
 import importlib
 import importlib.util
 import json
+import pathlib
 from types import ModuleType
+from typing import Any
 
 import pydantic
 import yaml
@@ -22,6 +24,13 @@ def load_module_from_path(path: str) -> ModuleType:
     return module
 
 
+def load_json_or_yaml(content: str) -> dict[str, Any]:
+    try:
+        return json.loads(content)
+    except Exception:
+        return yaml.safe_load(content)
+
+
 def output_object(obj: object, format: str) -> str:
     if format == 'json':
         return json.dumps(obj, indent=2, ensure_ascii=False)
@@ -34,6 +43,11 @@ def output_object(obj: object, format: str) -> str:
 
 def command_validate(args: argparse.Namespace) -> None:
     module = load_module_from_path(args.schema)
+    model: pydantic.BaseModel = getattr(module, args.model)
+    inpt = load_json_or_yaml(pathlib.Path(args.input).read_text())
+    obj = model.model_validate(inpt)
+    result = output_object(obj.model_dump(mode='json', by_alias=True), args.format)
+    print(result)
 
 
 def command_generate(args: argparse.Namespace) -> None:
@@ -52,7 +66,9 @@ def parse_args() -> tuple[argparse.ArgumentParser, argparse.Namespace]:
     parser_validate = subparsers.add_parser('validate')
     parser_validate.set_defaults(handler=command_validate)
     parser_validate.add_argument('-s', '--schema', required=True)
-    parser_validate.add_argument('-i', '--input')
+    parser_validate.add_argument('-m', '--model', default='Model')
+    parser_validate.add_argument('-i', '--input', required=True)
+    parser_validate.add_argument('-f', '--format', choices=['json', 'yaml'], default='json')
 
     parser_generate = subparsers.add_parser('generate')
     parser_generate.set_defaults(handler=command_generate)
@@ -66,7 +82,6 @@ def parse_args() -> tuple[argparse.ArgumentParser, argparse.Namespace]:
 
 def main() -> None:
     parser, args = parse_args()
-    print(args)
     if hasattr(args, 'handler'):
         args.handler(args)
     else:
