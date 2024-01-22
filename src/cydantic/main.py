@@ -5,6 +5,7 @@ import json
 from types import ModuleType
 
 import pydantic
+import yaml
 
 
 def load_module_from_path(path: str) -> ModuleType:
@@ -21,6 +22,16 @@ def load_module_from_path(path: str) -> ModuleType:
     return module
 
 
+def output_object(obj: object, format: str) -> str:
+    if format == 'json':
+        return json.dumps(obj, indent=2, ensure_ascii=False)
+
+    if format == 'yaml':
+        return yaml.safe_dump(obj, allow_unicode=True).strip()
+
+    raise Exception(f'Unknown format: {format}')
+
+
 def command_validate(args: argparse.Namespace) -> None:
     module = load_module_from_path(args.schema)
 
@@ -28,7 +39,10 @@ def command_validate(args: argparse.Namespace) -> None:
 def command_generate(args: argparse.Namespace) -> None:
     module = load_module_from_path(args.schema)
     model: pydantic.BaseModel = getattr(module, args.model)
-    print(json.dumps(model.model_json_schema(by_alias=True), indent=2))
+
+    model_schema = model.model_json_schema(by_alias=True)
+    result = output_object(model_schema, args.format)
+    print(result)
 
 
 def parse_args() -> tuple[argparse.ArgumentParser, argparse.Namespace]:
