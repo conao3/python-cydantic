@@ -41,12 +41,7 @@ class Model(pydantic.BaseModel):
 ### Generate JSON Schema
 
 ```bash
-cydantic generate -s schema.py
-```
-
-Output:
-
-```json
+$ cydantic generate -s sample/schema01.py
 {
   "properties": {
     "name": {
@@ -68,7 +63,18 @@ Output:
 Use `--format yaml` for YAML output:
 
 ```bash
-cydantic generate -s schema.py --format yaml
+$ cydantic generate -s sample/schema01.py --format yaml
+properties:
+  age:
+    default: 20
+    title: Age
+    type: integer
+  name:
+    default: John Doe
+    title: Name
+    type: string
+title: Model
+type: object
 ```
 
 ### Validate Input Data
@@ -76,13 +82,23 @@ cydantic generate -s schema.py --format yaml
 Validate a JSON or YAML file against your schema:
 
 ```bash
-cydantic validate -s schema.py -i input.json
+$ cydantic validate -s sample/schema01.py -f yaml -i sample/inpt01.json
+age: 20
+name: conao3
+
+$ cydantic validate -s sample/schema01.py -f yaml -i sample/inpt02.json
+age: 18
+name: conao3
 ```
 
-With YAML output format:
+Validation errors are reported with detailed messages:
 
 ```bash
-cydantic validate -s schema.py -i input.json --format yaml
+$ cydantic validate -s sample/schema01.py -f yaml -i sample/inpt03.json
+pydantic_core._pydantic_core.ValidationError: 1 validation error for Model
+age
+  Input should be a valid integer, unable to parse string as an integer [type=int_parsing, input_value='Unknown', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.5/v/int_parsing
 ```
 
 ## Command Reference
