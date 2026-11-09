@@ -11,7 +11,7 @@ cydantic = "cydantic.main:main"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-pydantic = "^2.14.1"
+pydantic = "^2.14.3"
 pyyaml = "^6.0.3"
 
 [build-system]
